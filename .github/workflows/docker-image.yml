@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Docker Image CI Java Spring Boot
 
 on:
   push:
@@ -15,4 +15,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      run: docker build . --file Dockerfile --tag trung2910/hello-spring-k8s:latest
+    - name: Push the Docker image
+      run: |
+        docker login -u trung2910 -p ${{ secrets.DOCKER_HUB_TOKEN }}
+        docker push trung2910/hello-spring-k8s:latest
