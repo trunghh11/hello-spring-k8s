@@ -1,22 +1,64 @@
-name: Docker Image CI Java Spring Boot
+# name: Docker Image CI Java Spring Boot
+
+# on:
+#   push:
+#     branches: [ "main" ]
+#   pull_request:
+#     branches: [ "main" ]
+
+# jobs:
+
+#   build:
+
+#     runs-on: ubuntu-latest
+
+#     steps:
+#     - uses: actions/checkout@v4
+#     - name: Build the Docker image
+#       run: docker build . --file Dockerfile --tag trung2910/hello-spring-k8s:latest
+#     - name: Push the Docker image
+#       run: |
+#         docker login -u trung2910 -p ${{ secrets.DOCKER_HUB_TOKEN }}
+#         docker push trung2910/hello-spring-k8s:latest
+
+
+name: CI Build
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
-
   build:
-
+    name: Build Main Branch
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag trung2910/hello-spring-k8s:latest
-    - name: Push the Docker image
-      run: |
-        docker login -u trung2910 -p ${{ secrets.DOCKER_HUB_TOKEN }}
-        docker push trung2910/hello-spring-k8s:latest
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build Hello Spring K8S with Maven
+        run: ./mvnw clean package
+
+      # Đăng nhập Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      # Build và Push Docker image cho hello-spring-k8s
+      - name: Build and Push Hello Spring K8S Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/hello-spring-k8s:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/hello-spring-k8s:latest
